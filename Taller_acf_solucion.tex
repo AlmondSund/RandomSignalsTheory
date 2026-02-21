@@ -1,0 +1,179 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{hyperref}
+
+\geometry{margin=1in}
+
+\title{Taller: Validez de una Función de Autocorrelación\\Definida como Suma de Gaussianas}
+\author{Martín Ramírez Espinosa\\Curso: Teoría de Señales}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Planteamiento}
+Se analiza la función
+\begin{equation}
+R(\tau)=\sum_{k\in\{-1,0,1\}}A_k\exp\left(-\frac{(\tau-\mu_k)^2}{2\sigma_k^2}\right),
+\end{equation}
+con
+\begin{equation}
+\mu_k = k,\quad A_k>0,\quad A_{-1}=A_1,\quad
+\sigma_k^2=
+\begin{cases}
+\sigma^2, & k=0,\\
+\sigma^2/|k|!, & k\neq 0.
+\end{cases}
+\end{equation}
+
+Como para $k=\pm1$ se cumple $|k|!=1$, resulta $\sigma_{-1}^2=\sigma_1^2=\sigma^2$, y por tanto:
+\begin{equation}
+R(\tau)=A_0e^{-\tau^2/(2\sigma^2)}
++A_1e^{-(\tau-1)^2/(2\sigma^2)}
++A_1e^{-(\tau+1)^2/(2\sigma^2)}.
+\end{equation}
+
+\section{Parte Teórica}
+\subsection{Propiedades básicas}
+\textbf{Realidad:} cada término es real y los coeficientes son reales, luego $R(\tau)\in\mathbb{R}$.
+
+\textbf{Simetría:}
+\begin{equation}
+R(-\tau)=A_0e^{-\tau^2/(2\sigma^2)}+A_1e^{-(\tau+1)^2/(2\sigma^2)}+A_1e^{-(\tau-1)^2/(2\sigma^2)}=R(\tau).
+\end{equation}
+
+\textbf{Máximo en $\tau=0$:} para una ACF válida de proceso WSS real debe cumplirse $|R(\tau)|\le R(0)$. Esta propiedad queda garantizada cuando se satisface la condición espectral de Wiener-Khinchin (sección \ref{sec:wk}).
+
+\subsection{Positividad definida y relación con Toeplitz}
+Una función es ACF válida si y solo si es positiva definida:
+\begin{equation}
+\sum_{m=1}^{N}\sum_{n=1}^{N} c_m c_n^*\,R(t_m-t_n)\ge 0,\quad
+\forall N,\forall\{c_n\},\forall\{t_n\}.
+\end{equation}
+
+En muestreo uniforme, esto equivale a que toda matriz de Toeplitz
+\begin{equation}
+T_{ij}=R((i-j)\Delta t)
+\end{equation}
+sea semidefinida positiva.
+
+\subsection{Teorema de Wiener-Khinchin}\label{sec:wk}
+Para un proceso WSS:
+\begin{equation}
+S(f)=\mathcal{F}\{R(\tau)\}.
+\end{equation}
+
+La transformada de un término gaussiano desplazado es:
+\begin{equation}
+\mathcal{F}\left\{e^{-(\tau-\mu)^2/(2\sigma^2)}\right\}
+=\sqrt{2\pi}\,\sigma\,e^{-2\pi^2\sigma^2f^2}e^{-j2\pi f\mu}.
+\end{equation}
+
+Entonces:
+\begin{align}
+S(f)&=\sqrt{2\pi}\,\sigma\,e^{-2\pi^2\sigma^2f^2}
+\left(A_0 + A_1e^{-j2\pi f}+A_1e^{j2\pi f}\right)\\
+&=\sqrt{2\pi}\,\sigma\,e^{-2\pi^2\sigma^2f^2}\left(A_0+2A_1\cos(2\pi f)\right).
+\end{align}
+
+Como el envolvente gaussiano es positivo, el signo lo determina
+\begin{equation}
+B(f)=A_0+2A_1\cos(2\pi f).
+\end{equation}
+Su minimo es $B_{\min}=A_0-2A_1$. Por tanto:
+\begin{equation}
+S(f)\ge 0\ \forall f
+\iff A_0-2A_1\ge 0.
+\end{equation}
+
+\subsection{Conclusión teórica}
+\begin{itemize}
+  \item \textbf{Válida} si $A_0>2A_1$.
+  \item \textbf{Caso umbral} si $A_0=2A_1$ (el espectro toca cero en frecuencias puntuales).
+  \item \textbf{Inválida} si $A_0<2A_1$ (hay regiones con $S(f)<0$).
+\end{itemize}
+La condición de validez no depende de $\sigma$ para el signo de $S(f)$.
+
+\section{Parte Computacional}
+Se implementó el análisis en:
+\begin{itemize}
+  \item \texttt{notebooks/taller\_acf\_solution.py}
+\end{itemize}
+y se generaron:
+\begin{itemize}
+  \item \texttt{output/taller\_acf/metrics.json}
+  \item \texttt{output/taller\_acf/summary.md}
+  \item \texttt{output/taller\_acf/caso\_1\_valido.png}
+  \item \texttt{output/taller\_acf/caso\_2\_umbral.png}
+  \item \texttt{output/taller\_acf/caso\_3\_invalido.png}
+\end{itemize}
+
+\subsection{Configuraciones evaluadas}
+\begin{enumerate}
+  \item Caso 1 válido: $A_0=2.8,\ A_1=1.0,\ \sigma=0.35$.
+  \item Caso 2 umbral: $A_0=2.0,\ A_1=1.0,\ \sigma=0.65$.
+  \item Caso 3 inválido: $A_0=1.2,\ A_1=1.0,\ \sigma=0.90$.
+\end{enumerate}
+
+\subsection{Resultados numéricos}
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrrrr}
+\toprule
+Caso & $A_0-2A_1$ & $\min S(f)$ cerrada & $\min S(f)$ FFT & Negativas & $\lambda_{\min}$ Toeplitz \\
+\midrule
+Caso 1 válido   & 0.8  & $1.918\times10^{-7}$  & $-3.61\times10^{-16}$ & 0   & $-7.87\times10^{-14}$ \\
+Caso 2 umbral   & 0.0  & $0.0$                 & $-1.02\times10^{-14}$ & 0   & $-7.16\times10^{-14}$ \\
+Caso 3 inválido & -0.8 & $-7.51\times10^{-2}$  & $-7.48\times10^{-2}$  & 946 & $-1.31\times10^{-9}$ \\
+\bottomrule
+\end{tabular}
+\caption{Validación numérica de la condición teórica de validez.}
+\end{table}
+
+Los valores negativos de orden $10^{-14}$ en casos válidos son error numérico. En el caso inválido, la negatividad es macroscópica, por lo que no puede atribuirse a redondeo.
+
+\subsection{Gráficas}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{output/taller_acf/caso_1_valido.png}
+  \caption{Caso 1 válido: espectro no negativo.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{output/taller_acf/caso_2_umbral.png}
+  \caption{Caso 2 umbral: el espectro toca cero.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{output/taller_acf/caso_3_invalido.png}
+  \caption{Caso 3 inválido: regiones negativas en $S(f)$.}
+\end{figure}
+
+\section{Respuestas a las preguntas de análisis}
+\begin{enumerate}
+  \item \textbf{No} toda suma de gaussianas define una ACF válida: debe cumplir simetría y no negatividad espectral.
+  \item Las gaussianas desplazadas introducen la modulación cosenoidal $2A_1\cos(2\pi f)$ que puede forzar negatividad.
+  \item Sí: el umbral exacto es $A_0=2A_1$.
+  \item Si es válida, describe un proceso WSS con covarianza central más dos lóbulos laterales simétricos.
+  \item Si el espectro es negativo en alguna frecuencia, la función no puede ser PSD física de un proceso WSS real.
+\end{enumerate}
+
+\section{Conclusión final}
+La función propuesta \textbf{no es siempre válida}.  
+Es \textbf{válida bajo ciertas condiciones}, exactamente cuando:
+\begin{equation}
+A_0\ge 2A_1.
+\end{equation}
+Si $A_0<2A_1$, \textbf{no es válida en general} por violar $S(f)\ge 0$.
+
+\end{document}
