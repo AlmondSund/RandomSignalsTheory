@@ -1,0 +1,847 @@
+# AM Signals and Demodulation: DSB-LC, DSB-SC, Envelope, Coherent, and IQ
+
+This notebook develops the mathematical theory behind amplitude-modulated passband signals and the three demodulation families covered by the workshop: envelope detection, coherent demodulation, and IQ demodulation.
+
+We use angular frequency $\omega = 2\pi f$. The baseband signal is denoted by $m(t)$, the carrier angular frequency by $\omega_c$, and the carrier phase by $\theta_c$. Unless stated otherwise, $m(t)$ is real valued, low-pass, and band-limited to $|\omega| \leq W$, with $W \ll \omega_c$ so that the positive and negative sidebands around the carrier do not overlap.
+
+For deterministic signals we use the Fourier transform pair
+
+$$
+X(\omega)=\int_{-\infty}^{\infty}x(t)e^{-j\omega t}\,dt,
+\qquad
+x(t)=\frac{1}{2\pi}\int_{-\infty}^{\infty}X(\omega)e^{j\omega t}\,d\omega.
+$$
+
+For random processes, $R_x(\tau)=\mathbb{E}\{x(t)x(t+\tau)\}$ denotes the autocorrelation of a WSS process and $S_x(\omega)$ denotes its two-sided PSD.
+
+## 1. Low-Pass, Passband, and Complex-Envelope Descriptions
+
+A real passband signal centered at $\omega_c$ can be represented through a complex envelope $u(t)$ as
+
+$$
+s(t)=\operatorname{Re}\{u(t)e^{j\omega_c t}\}.
+$$
+
+Writing $u(t)=I(t)+jQ(t)$ gives the quadrature form
+
+$$
+s(t)=I(t)\cos(\omega_c t)-Q(t)\sin(\omega_c t).
+$$
+
+Thus $I(t)$ is the in-phase component and $Q(t)$ is the quadrature component. The equivalent envelope and phase are
+
+$$
+A(t)=|u(t)|=\sqrt{I^2(t)+Q^2(t)},
+\qquad
+\phi(t)=\arg u(t)=\operatorname{atan2}(Q(t),I(t)).
+$$
+
+Then
+
+$$
+s(t)=A(t)\cos(\omega_c t+\phi(t)).
+$$
+
+This representation is exact for any real passband signal whose spectrum is concentrated near $\pm\omega_c$. Demodulation can therefore be interpreted as estimating $u(t)$ or some function of $u(t)$ from $s(t)$.
+
+## 2. Double-Sideband Suppressed-Carrier AM (DSB-SC)
+
+In DSB-SC modulation the carrier is not transmitted as an independent spectral line. The transmitted waveform is
+
+$$
+s_{\mathrm{SC}}(t)=A_c m(t)\cos(\omega_c t),
+$$
+
+where $A_c$ is a carrier-amplitude scale. Using
+
+$$
+\cos(\omega_c t)=\frac{1}{2}\left(e^{j\omega_c t}+e^{-j\omega_c t}\right),
+$$
+
+the spectrum is
+
+$$
+S_{\mathrm{SC}}(\omega)
+=\frac{A_c}{2}\left[M(\omega-\omega_c)+M(\omega+\omega_c)\right].
+$$
+
+The baseband spectrum is copied to two sidebands centered at $+\omega_c$ and $-\omega_c$. If $M(\omega)$ is supported on $|\omega|\leq W$, then DSB-SC occupies approximately
+
+$$
+\omega_c-W \leq |\omega| \leq \omega_c+W,
+$$
+
+so its positive-frequency transmission bandwidth is $2W$.
+
+The complex envelope of a phase-aligned DSB-SC signal is real:
+
+$$
+u_{\mathrm{SC}}(t)=A_c m(t).
+$$
+
+The sign of $m(t)$ is therefore encoded as a $\pi$ phase reversal of the passband carrier. This fact is crucial: an envelope magnitude detector sees $|m(t)|$, not $m(t)$.
+
+## 3. DSB-SC as a Random Process
+
+Assume $m(t)$ is zero-mean WSS with autocorrelation $R_m(\tau)$ and PSD $S_m(\omega)$. The modulated signal
+
+$$
+s_{\mathrm{SC}}(t)=A_c m(t)\cos(\omega_c t)
+$$
+
+is generally cyclostationary rather than WSS, because multiplication by a deterministic periodic carrier introduces dependence on the absolute time $t$.
+
+Using the symmetric-lag convention,
+
+$$
+R_s(t,\tau)=\mathbb{E}\left\{s\left(t+\frac{\tau}{2}\right)s\left(t-\frac{\tau}{2}\right)\right\},
+$$
+
+we obtain
+
+$$
+\begin{aligned}
+R_{s_{\mathrm{SC}}}(t,\tau)
+&=A_c^2 R_m(\tau)
+\cos\left(\omega_c\left(t+\frac{\tau}{2}\right)\right)
+\cos\left(\omega_c\left(t-\frac{\tau}{2}\right)\right) \\
+&=\frac{A_c^2}{2}R_m(\tau)
+\left[\cos(\omega_c\tau)+\cos(2\omega_c t)\right].
+\end{aligned}
+$$
+
+Averaging over one carrier period $T_c=2\pi/\omega_c$ removes the explicit $t$ dependence:
+
+$$
+\overline{R}_{s_{\mathrm{SC}}}(\tau)
+=\frac{1}{T_c}\int_0^{T_c}R_{s_{\mathrm{SC}}}(t,\tau)\,dt
+=\frac{A_c^2}{2}R_m(\tau)\cos(\omega_c\tau).
+$$
+
+The corresponding cycle-averaged PSD is
+
+$$
+\overline{S}_{s_{\mathrm{SC}}}(\omega)
+=\frac{A_c^2}{4}\left[S_m(\omega-\omega_c)+S_m(\omega+\omega_c)\right].
+$$
+
+The average transmitted power is
+
+$$
+P_{\mathrm{SC}}=\overline{R}_{s_{\mathrm{SC}}}(0)=\frac{A_c^2}{2}R_m(0).
+$$
+
+## 4. Double-Sideband Large-Carrier AM (DSB-LC)
+
+In conventional AM, a carrier bias is added before modulation:
+
+$$
+s_{\mathrm{LC}}(t)=A_c\left[1+k_a m(t)\right]\cos(\omega_c t),
+$$
+
+where $k_a$ is the amplitude sensitivity. The instantaneous amplitude factor is
+
+$$
+a(t)=A_c\left[1+k_a m(t)\right].
+$$
+
+The usual no-overmodulation condition is
+
+$$
+1+k_a m(t)\geq 0 \qquad \text{for all operating values of } m(t).
+$$
+
+If $|m(t)|\leq m_{\max}$, the modulation index is
+
+$$
+\mu=k_a m_{\max},
+$$
+
+and no overmodulation requires
+
+$$
+0\leq \mu \leq 1.
+$$
+
+The deterministic spectrum is
+
+$$
+S_{\mathrm{LC}}(\omega)
+=\pi A_c\left[\delta(\omega-\omega_c)+\delta(\omega+\omega_c)\right]
++\frac{A_c k_a}{2}\left[M(\omega-\omega_c)+M(\omega+\omega_c)\right].
+$$
+
+Thus DSB-LC contains a discrete carrier at $\pm\omega_c$ plus the same pair of sidebands as DSB-SC. If $m(t)$ is zero mean with average power $P_m=\mathbb{E}\{m^2(t)\}$, the time-average power is
+
+$$
+P_{\mathrm{LC}}=\frac{A_c^2}{2}\left(1+k_a^2P_m\right).
+$$
+
+The carrier power is $A_c^2/2$ and the sideband power is $A_c^2k_a^2P_m/2$.
+
+## 5. Envelope and Analytic Signal
+
+The analytic signal associated with a real passband waveform $s(t)$ is
+
+$$
+s_a(t)=s(t)+j\mathcal{H}\{s(t)\},
+$$
+
+where $\mathcal{H}\{\cdot\}$ is the Hilbert transform. Its magnitude is the passband envelope:
+
+$$
+A_s(t)=|s_a(t)|.
+$$
+
+If
+
+$$
+s(t)=a(t)\cos(\omega_c t)
+$$
+
+and $a(t)$ is sufficiently low-pass compared with $\omega_c$, then the Bedrosian separation condition gives approximately
+
+$$
+s_a(t)\approx a(t)e^{j\omega_c t},
+\qquad
+A_s(t)\approx |a(t)|.
+$$
+
+This approximation is the mathematical basis of envelope detection. It also shows why the detector recovers different objects for DSB-LC and DSB-SC.
+
+## 6. Envelope Detection for DSB-LC
+
+For DSB-LC,
+
+$$
+s_{\mathrm{LC}}(t)=A_c\left[1+k_a m(t)\right]\cos(\omega_c t).
+$$
+
+If the no-overmodulation condition holds, then $1+k_a m(t)\geq 0$, so
+
+$$
+A_{\mathrm{LC}}(t)=A_c\left[1+k_a m(t)\right].
+$$
+
+An ideal envelope detector followed by DC removal gives
+
+$$
+A_{\mathrm{LC}}(t)-A_c=A_c k_a m(t),
+$$
+
+and therefore
+
+$$
+\widehat{m}(t)=\frac{A_{\mathrm{LC}}(t)-A_c}{A_c k_a}=m(t).
+$$
+
+Thus envelope detection is correct for conventional AM only under the operating condition that the transmitted amplitude never changes sign.
+
+If overmodulation occurs, there exist times for which $1+k_a m(t)<0$. The envelope becomes
+
+$$
+A_{\mathrm{LC}}(t)=A_c|1+k_a m(t)|,
+$$
+
+which folds the negative parts upward. The mapping is nonlinear and no longer invertible from magnitude alone.
+
+## 7. Envelope Detection for DSB-SC
+
+For DSB-SC,
+
+$$
+s_{\mathrm{SC}}(t)=A_c m(t)\cos(\omega_c t).
+$$
+
+The low-pass factor multiplying the carrier is $a(t)=A_c m(t)$, which may be positive or negative. Hence the analytic-envelope magnitude is approximately
+
+$$
+A_{\mathrm{SC}}(t)=A_c|m(t)|.
+$$
+
+The sign of $m(t)$ is lost. Therefore an envelope detector cannot recover a general signed message from DSB-SC modulation.
+
+If $m(t)$ is zero-mean Gaussian with variance $\sigma_m^2$, then $|m(t)|$ is half-normal at each fixed time. Its mean and variance are
+
+$$
+\mathbb{E}\{|m(t)|\}=\sigma_m\sqrt{\frac{2}{\pi}},
+\qquad
+\operatorname{var}(|m(t)|)=\sigma_m^2\left(1-\frac{2}{\pi}\right).
+$$
+
+Consequently, a DSB-SC envelope detector introduces a positive DC component and changes the second-order structure of the process. It is a magnitude tracker, not a signed coherent receiver.
+
+## Bipolar Message Behavior in LC and SC Modulation
+
+A bipolar message is a signal $m(t)$ that can take positive and negative values. This is the normal situation for audio waveforms, zero-mean random processes, and many baseband communication signals. The important modulation question is therefore: what does the passband waveform do when $m(t)$ crosses zero and changes polarity?
+
+In DSB-LC, the transmitted signal is
+
+$$
+s_{\mathrm{LC}}(t)=A_c\left[1+k_a m(t)\right]\cos(\omega_c t).
+$$
+
+The carrier term $1$ shifts the bipolar message upward before modulation. If the no-overmodulation condition
+
+$$
+1+k_a m(t)\geq 0
+$$
+
+holds for all $t$, then the multiplier of the carrier never becomes negative. The passband signal keeps the same carrier phase, and the information appears as a slow expansion and contraction of the carrier envelope. In this case, positive values of $m(t)$ make the envelope larger than $A_c$, while negative values make it smaller than $A_c$ but still nonnegative. This is why a simple envelope detector can recover the bipolar message after subtracting the carrier level.
+
+In DSB-SC, the transmitted signal is
+
+$$
+s_{\mathrm{SC}}(t)=A_c m(t)\cos(\omega_c t).
+$$
+
+Here there is no positive carrier offset. When $m(t)>0$, the passband waveform is in phase with the carrier; when $m(t)<0$, it is equivalent to
+
+$$
+A_c m(t)\cos(\omega_c t)=A_c\lvert m(t)\rvert\cos(\omega_c t+\pi).
+$$
+
+Thus a polarity change in the baseband message becomes a $\pi$ phase reversal in the passband waveform. The physical envelope magnitude is only $A_c\lvert m(t)\rvert$, so the envelope does not contain the sign of $m(t)$. The sign is carried by carrier phase, not by envelope height.
+
+This is the central phenomenon: LC converts a bipolar message into a nonnegative amplitude variation around a transmitted carrier reference, while SC leaves the message bipolar and stores polarity as carrier phase. LC spends extra carrier power to make envelope detection possible; SC saves that carrier power but requires coherent or IQ demodulation to recover the sign of the original message.
+
+## 8. Coherent Demodulation
+
+Coherent demodulation multiplies the received passband signal by a synchronized local oscillator and then low-pass filters the product. Let
+
+$$
+r(t)=s(t)\cos(\omega_c t+\phi),
+$$
+
+where $\phi$ is the phase error between the receiver oscillator and the transmitter carrier.
+
+For DSB-SC,
+
+$$
+\begin{aligned}
+r_{\mathrm{SC}}(t)
+&=A_c m(t)\cos(\omega_c t)\cos(\omega_c t+\phi) \\
+&=\frac{A_c}{2}m(t)\cos\phi
++\frac{A_c}{2}m(t)\cos(2\omega_c t+\phi).
+\end{aligned}
+$$
+
+After an ideal LPF that passes the baseband but rejects the $2\omega_c$ term,
+
+$$
+y_{\mathrm{SC}}(t)=\operatorname{LPF}\{2r_{\mathrm{SC}}(t)\}=A_c m(t)\cos\phi.
+$$
+
+The factor 2 is a conventional receiver gain used to compensate for the product-to-baseband factor $1/2$. If $\phi=0$, the receiver recovers $A_c m(t)$. If $\phi=\pi/2$, the output is zero. If $\phi=\pi$, the output is sign reversed.
+
+For DSB-LC,
+
+$$
+y_{\mathrm{LC}}(t)=\operatorname{LPF}\{2s_{\mathrm{LC}}(t)\cos(\omega_c t+\phi)\}
+=A_c\left[1+k_a m(t)\right]\cos\phi.
+$$
+
+After removing the DC component and rescaling, the message is recovered when $\cos\phi\neq 0$.
+
+## 9. Coherent Demodulation in the Frequency Domain
+
+For DSB-SC, multiplying by $2\cos(\omega_c t+\phi)$ produces two spectral translations:
+
+$$
+2s_{\mathrm{SC}}(t)\cos(\omega_c t+\phi)
+=A_c m(t)\cos\phi + A_c m(t)\cos(2\omega_c t+\phi).
+$$
+
+The first term lies at baseband and the second term lies around $\pm 2\omega_c$. The low-pass filter must satisfy
+
+$$
+W < \omega_{\mathrm{LPF}} < 2\omega_c-W
+$$
+
+so that it passes the message spectrum and rejects the double-frequency image.
+
+The baseband output PSD for zero-mean WSS $m(t)$ is therefore
+
+$$
+S_y(\omega)=A_c^2\cos^2\phi\;S_m(\omega).
+$$
+
+The output autocorrelation is
+
+$$
+R_y(\tau)=A_c^2\cos^2\phi\;R_m(\tau).
+$$
+
+Thus coherent demodulation preserves the complete second-order shape of the baseband process. Phase error changes only the recovered scale, except at the quadrature-null case where $\cos\phi=0$.
+
+## 10. IQ Demodulation
+
+IQ demodulation estimates both quadrature projections of the passband signal. Define
+
+$$
+I(t)=\operatorname{LPF}\{2s(t)\cos(\omega_c t)\},
+$$
+
+$$
+Q(t)=\operatorname{LPF}\{-2s(t)\sin(\omega_c t)\}.
+$$
+
+If
+
+$$
+s(t)=\operatorname{Re}\{u(t)e^{j\omega_c t}\}
+=I_u(t)\cos(\omega_c t)-Q_u(t)\sin(\omega_c t),
+$$
+
+then ideal IQ demodulation gives
+
+$$
+I(t)=I_u(t),
+\qquad
+Q(t)=Q_u(t),
+$$
+
+provided the LPF rejects the images around $2\omega_c$.
+
+Equivalently, complex mixing gives
+
+$$
+\operatorname{LPF}\{2s(t)e^{-j\omega_c t}\}=u(t).
+$$
+
+This is the cleanest theoretical form: IQ demodulation recovers the complex envelope.
+
+## 11. IQ View of DSB-SC and DSB-LC
+
+For phase-aligned DSB-SC,
+
+$$
+s_{\mathrm{SC}}(t)=A_c m(t)\cos(\omega_c t)
+=\operatorname{Re}\{A_c m(t)e^{j\omega_c t}\}.
+$$
+
+Thus
+
+$$
+u_{\mathrm{SC}}(t)=A_c m(t),
+\qquad
+I(t)=A_c m(t),
+\qquad
+Q(t)=0.
+$$
+
+If the carrier has an unknown constant phase $\theta$, then
+
+$$
+s_{\mathrm{SC}}(t)=A_c m(t)\cos(\omega_c t+\theta)
+=\operatorname{Re}\{A_c m(t)e^{j\theta}e^{j\omega_c t}\}.
+$$
+
+The IQ output becomes
+
+$$
+I(t)=A_c m(t)\cos\theta,
+\qquad
+Q(t)=A_c m(t)\sin\theta.
+$$
+
+The message is recovered by projecting onto the correct carrier phase:
+
+$$
+\widehat{m}(t)=\frac{I(t)\cos\theta+Q(t)\sin\theta}{A_c}.
+$$
+
+The magnitude
+
+$$
+\sqrt{I^2(t)+Q^2(t)}=A_c|m(t)|
+$$
+
+again loses the sign, so IQ magnitude alone behaves like an envelope detector for DSB-SC. The sign is carried by the complex-envelope phase, which jumps by $\pi$ when $m(t)$ changes sign.
+
+For DSB-LC under no overmodulation,
+
+$$
+u_{\mathrm{LC}}(t)=A_c\left[1+k_a m(t)\right],
+$$
+
+so $I(t)$ contains the carrier bias plus the scaled message and $Q(t)=0$ in the phase-aligned case.
+
+## 12. Envelope, Coherent, and IQ Receivers Compared
+
+| Modulation | Receiver | Ideal output | Main condition | Main failure mode |
+|---|---|---|---|---|
+| DSB-LC | Envelope | $A_c[1+k_a m(t)]$ | $1+k_a m(t)\geq 0$ | Overmodulation folds the waveform |
+| DSB-LC | Coherent | $A_c[1+k_a m(t)]\cos\phi$ | Carrier frequency and phase known up to $\cos\phi\neq 0$ | Phase quadrature null |
+| DSB-LC | IQ | $A_c[1+k_a m(t)]e^{j\theta}$ | LPF separates baseband from $2\omega_c$ image | Carrier/phase estimation error |
+| DSB-SC | Envelope | $A_c\lvert m(t)\rvert$ | Useful only if the message is nonnegative or only magnitude is needed | Sign is lost |
+| DSB-SC | Coherent | $A_c m(t)\cos\phi$ | Carrier phase synchronized | Phase quadrature null or scale error |
+| DSB-SC | IQ | $A_c m(t)e^{j\theta}$ | Complex carrier reference available or estimable | Magnitude-only processing loses sign |
+
+The essential distinction is that envelope detection is a magnitude operation, coherent demodulation is a signed projection onto a carrier reference, and IQ demodulation recovers the full complex envelope.
+
+The difference between LC and SC is the transmitted carrier term. In DSB-LC, the signal is $A_c[1+k_a m(t)]\cos(\omega_c t)$, so the constant $1$ sends a strong carrier component even when $m(t)=0$. That carrier gives the waveform a positive amplitude reference when $1+k_a m(t)\geq 0$, which is why an envelope detector can read the message from the passband magnitude.
+
+In DSB-SC, the signal is $A_c m(t)\cos(\omega_c t)$, so there is no independent carrier reference. When $m(t)$ changes sign, the passband signal changes phase by $\pi$ rather than producing a negative envelope. A magnitude-only detector cannot distinguish $m(t)$ from $-m(t)$, so SC saves carrier power but requires coherent phase information, usually through a synchronized oscillator or an IQ receiver.
+
+## Staged Experiment Structure
+
+The assigned experiment is organized in four stages:
+
+I. **Input Signal**: define the rectangular pulse and its sampling convention.
+
+II. **DSB Modulation**: generate DSB-LC and DSB-SC passband signals for the requested modulation indices.
+
+III. **AWGN Channel**: add passband white Gaussian noise at the requested SNR values.
+
+IV. **Demodulation**: recover the message using envelope, coherent, and IQ receivers, then compare waveform, ACF, PSD, and bandwidth behavior.
+
+## I. Input Signal
+
+The empirical study uses a finite rectangular pulse as the input signal. The number of samples is
+
+$$
+N=4096,
+$$
+
+and the requested sampling increment is
+
+$$
+\Delta t=\frac{1}{N}.
+$$
+
+Therefore the frequency-axis computations use the equivalent sampling rate
+
+$$
+f_s=\frac{1}{\Delta t}=N=4096.
+$$
+
+The input message is a unipolar rectangular pulse with amplitude 1 and duration 2048 samples:
+
+$$
+m[n]=
+\begin{cases}
+1, & 0\leq n<2048,\\
+0, & 2048\leq n<4096.
+\end{cases}
+$$
+
+Its discrete-time duty cycle is $1/2$, so its sample mean is $1/2$. The centered component $m[n]-1/2$ carries the pulse transition, while the DC component appears as a spectral line at zero frequency. Because the pulse has sharp edges, its spectrum has sinc-like sidelobes and non-negligible high-frequency content.
+
+For the empirical implementation, this one-high/one-low record is treated as one period of a rectangular waveform. Therefore the input fundamental frequency is
+
+$$
+f_m=\frac{1}{N\Delta t},
+$$
+
+and the carrier is chosen as $f_c=30f_m$.
+
+## II. DSB Modulation
+
+For DSB-LC, the modulation index is imposed through
+
+$$
+s_{\mathrm{LC},\mu}[n]=A_c\left[1+\mu m[n]\right]\cos(2\pi f_c n\Delta t),
+\qquad
+\mu\in\{0.72,1.00,1.23\}.
+$$
+
+In the numerical experiment the carrier is not chosen independently: it is fixed at $f_c=30f_m$, where $f_m$ is the input fundamental frequency defined by the full record length.
+
+Because $m[n]\in\{0,1\}$, all three LC cases remain nonnegative in the envelope multiplier $1+\mu m[n]$. Thus these values do not represent overmodulation for this unipolar rectangular input; instead they represent increasing envelope depth and sideband power.
+
+For DSB-SC, the transmitted signal is
+
+$$
+s_{\mathrm{SC}}[n]=A_c m[n]\cos(2\pi f_c n\Delta t).
+$$
+
+Since this assigned rectangular pulse is nonnegative, the SC envelope equals $A_c m[n]$ in the noiseless ideal case. This is different from bipolar SC, where envelope detection loses the sign.
+
+## III. AWGN Channel
+
+The channel adds white Gaussian noise at passband. For a target SNR in dB,
+
+$$
+\sigma_n^2=\frac{P_s}{10^{\mathrm{SNR}_{\mathrm{dB}}/10}},
+\qquad
+r[n]=s[n]+n[n],
+$$
+
+where $P_s$ is the empirical passband signal power. The experiment uses
+
+$$
+\mathrm{SNR}_{\mathrm{dB}}\in\{30,10,3\}.
+$$
+
+The channel stage is evaluated both directly, through passband ACF/PSD/bandwidth estimates, and indirectly through the degradation it causes in each demodulator output.
+
+## IV. Demodulation
+
+The demodulators are evaluated as follows.
+
+1. **Envelope detector.** A diode peak detector with RC discharge is used. The good-inertia case suppresses carrier ripple while still following the rectangular pulse edges. The bad-inertia case uses a discharge that is too slow, so the recovered envelope decays sluggishly after the falling edge.
+
+2. **Coherent detector.** The receiver multiplies by $2\cos(2\pi f_c n\Delta t+\phi)$ and low-pass filters:
+   $$
+   \widehat{x}_{\phi}[n]=\operatorname{LPF}\{2r[n]\cos(2\pi f_c n\Delta t+\phi)\}.
+   $$
+   For SC, the ideal noiseless output is $A_c m[n]\cos\phi$. For LC, the ideal noiseless output is $A_c[1+\mu m[n]]\cos\phi$. The sweep uses
+   $$
+   \phi\in\left\{0,\frac{\pi}{16},\frac{2\pi}{16},\ldots,\frac{8\pi}{16}\right\}.
+   $$
+
+3. **IQ detector.** Complex demodulation estimates the complex envelope:
+   $$
+   \widehat{u}[n]=\operatorname{LPF}\{2r[n]e^{-j(2\pi f_c n\Delta t+\phi)}\}.
+   $$
+   A pure phase error rotates the complex envelope and can be corrected if the phase is known or estimated. IQ imbalance is modeled as unequal I/Q gains plus a small quadrature phase skew, so even after phase correction the complex-envelope geometry is distorted.
+
+The empirical metrics report correlation, normalized mean-square error (NMSE), and recovered SNR against the rectangular message. A best affine fit is also reported for some comparisons to separate shape distortion from simple gain and DC errors.
+
+## Quadrature and Canonical Representations for LC and SC
+
+For every real passband signal centered at $f_c$, there are two equivalent descriptions.
+
+The **quadrature representation** is
+
+$$
+s[n]=I[n]\cos(2\pi f_c n\Delta t)-Q[n]\sin(2\pi f_c n\Delta t),
+$$
+
+with complex envelope
+
+$$
+u[n]=I[n]+jQ[n].
+$$
+
+The **canonical envelope-phase representation** is
+
+$$
+s[n]=A[n]\cos(2\pi f_c n\Delta t+\varphi[n]),
+$$
+
+where
+
+$$
+A[n]=\sqrt{I^2[n]+Q^2[n]},
+\qquad
+\varphi[n]=\operatorname{atan2}(Q[n],I[n]).
+$$
+
+### DSB-LC
+
+For the assigned LC signal,
+
+$$
+s_{\mathrm{LC},\mu}[n]=A_c\left[1+\mu m[n]\right]\cos(2\pi f_c n\Delta t).
+$$
+
+Thus its ideal quadrature components are
+
+$$
+I_{\mathrm{LC}}[n]=A_c\left[1+\mu m[n]\right],
+\qquad
+Q_{\mathrm{LC}}[n]=0.
+$$
+
+Since $m[n]\in\{0,1\}$ and $\mu>0$, $I_{\mathrm{LC}}[n]>0$. Therefore the canonical representation is
+
+$$
+A_{\mathrm{LC}}[n]=A_c\left[1+\mu m[n]\right],
+\qquad
+\varphi_{\mathrm{LC}}[n]=0.
+$$
+
+So, for this unipolar rectangular input, LC stores the information as a strictly nonnegative envelope variation around a transmitted carrier reference.
+
+### DSB-SC
+
+For the assigned SC signal,
+
+$$
+s_{\mathrm{SC}}[n]=A_c m[n]\cos(2\pi f_c n\Delta t).
+$$
+
+The ideal quadrature components are
+
+$$
+I_{\mathrm{SC}}[n]=A_c m[n],
+\qquad
+Q_{\mathrm{SC}}[n]=0.
+$$
+
+Because this particular $m[n]$ is nonnegative, the canonical representation is
+
+$$
+A_{\mathrm{SC}}[n]=A_c m[n],
+\qquad
+\varphi_{\mathrm{SC}}[n]=0
+$$
+
+where the pulse is present. During the zero part of the pulse, $A_{\mathrm{SC}}[n]=0$, so phase is not physically meaningful. For a bipolar SC message, negative values of $m[n]$ would instead appear as $A_{\mathrm{SC}}[n]=A_c|m[n]|$ with a phase jump of $\pi$.
+
+Empirically, the IQ demodulator estimates $\widehat{u}[n]=\widehat{I}[n]+j\widehat{Q}[n]$. From that estimate we compute both
+
+$$
+(\widehat{I}[n],\widehat{Q}[n])
+$$
+
+and
+
+$$
+\widehat{A}[n]=|\widehat{u}[n]|,
+\qquad
+\widehat{\varphi}[n]=\operatorname{unwrap}(\arg \widehat{u}[n]).
+$$
+
+The numerical comparison below checks these two descriptions for LC and SC under both ideal IQ and imbalanced IQ conditions.
+
+## Stage-Wise ACF, PSD, and Bandwidth Analysis
+
+This section makes the second-order analysis explicit for every stage of the assigned communication chain. The input is the finite rectangular sequence
+
+$$
+m[n]=u[n]-u[n-2048],
+\qquad
+0\leq n<4096,
+$$
+
+with amplitude 1, duration $L=2048$ samples, and sampling increment $\Delta t=1/4096$.
+
+### Input Stage
+
+For the finite deterministic sequence, the empirical autocorrelation is
+
+$$
+\widehat{R}_m[\ell]=\frac{1}{N-\ell}\sum_{n=0}^{N-1-\ell}(m[n]-\bar m)(m[n+\ell]-\bar m),
+\qquad
+\ell\geq 0.
+$$
+
+If the non-centered rectangular pulse is analyzed directly, its Fourier transform is the discrete Dirichlet-kernel form
+
+$$
+M(e^{j\Omega})=e^{-j\Omega(L-1)/2}\frac{\sin(\Omega L/2)}{\sin(\Omega/2)},
+\qquad
+L=2048,
+$$
+
+plus the finite-record interpretation implied by the sampled sequence. Its PSD is therefore sinc-like: a large DC component, a main lobe controlled by the pulse duration, and sidelobes caused by the sharp edges. In the empirical code, PSDs are computed after mean removal when estimating bandwidth, so the reported bandwidth describes the transition-bearing AC component rather than the DC level.
+
+### DSB-SC Modulation Stage
+
+For
+
+$$
+s_{\mathrm{SC}}[n]=A_c m[n]\cos(2\pi f_c n\Delta t),
+$$
+
+the cycle-averaged PSD is a shifted copy of the input spectrum:
+
+$$
+\overline{S}_{s_{\mathrm{SC}}}(f)=\frac{A_c^2}{4}\left[S_m(f-f_c)+S_m(f+f_c)\right].
+$$
+
+The nominal sideband span around the carrier is determined by the practical baseband cutoff selected for the rectangular-pulse transition content.
+
+### DSB-LC Modulation Stage
+
+For
+
+$$
+s_{\mathrm{LC}}[n]=A_c[1+\mu m[n]]\cos(2\pi f_c n\Delta t),
+$$
+
+the PSD contains the carrier component plus sidebands generated by the rectangular pulse:
+
+$$
+\overline{S}_{s_{\mathrm{LC}}}(f)
+=\frac{A_c^2}{4}\left[\delta(f-f_c)+\delta(f+f_c)\right]
++\frac{A_c^2\mu^2}{4}\left[S_m(f-f_c)+S_m(f+f_c)\right].
+$$
+
+Increasing $\mu$ increases the sideband power relative to the carrier. Since the assigned pulse is unipolar, the envelope multiplier $1+\mu m[n]$ does not become negative for the requested $\mu$ values.
+
+### AWGN Channel Stage
+
+The received signal is
+
+$$
+r[n]=s[n]+w[n],
+$$
+
+where $w[n]$ is white Gaussian noise independent of $s[n]$. Hence
+
+$$
+R_r[\ell]=R_s[\ell]+R_w[\ell],
+\qquad
+S_r(f)=S_s(f)+S_w(f).
+$$
+
+White noise spreads energy across the Nyquist band, so the empirical occupied bandwidth of the raw received waveform grows as SNR decreases.
+
+### Envelope-Detector Stage
+
+For LC with good inertia,
+
+$$
+\widehat{m}_{\mathrm{env}}[n]\approx m[n].
+$$
+
+For SC with this nonnegative rectangular pulse, the envelope also contains the correct pulse support in the noiseless ideal case. The bad-inertia detector has an overly slow discharge and therefore stretches the falling edge; analytically this behaves like nonlinear envelope extraction followed by excessive smoothing, which changes the ACF and narrows or distorts the useful baseband spectrum.
+
+### Coherent-Demodulator Stage
+
+For phase error $\phi$,
+
+$$
+\widehat{m}_{\mathrm{coh}}[n]\approx m[n]\cos\phi + n_b[n],
+$$
+
+after the correct LC DC removal or SC scaling. Therefore
+
+$$
+R_{\widehat{m}_{\mathrm{coh}}}[\ell]\approx \cos^2\phi\,R_m[\ell]+R_{n_b}[\ell],
+\qquad
+S_{\widehat{m}_{\mathrm{coh}}}(f)\approx \cos^2\phi\,S_m(f)+S_{n_b}(f).
+$$
+
+### IQ-Demodulator Stage
+
+An ideal IQ receiver estimates the complex envelope. After phase correction,
+
+$$
+\widehat{u}[n]\approx A_c m[n]+n_I[n]+j n_Q[n]
+$$
+
+for SC, and similarly $A_c[1+\mu m[n]]$ for LC before DC removal. IQ imbalance mixes and rescales the two quadratures, creating residual image leakage and changing the measured PSD and ACF even when pure phase rotation has been corrected.
+
+### Empirical Interpretation
+
+The tables and plots should be read together with the analytical receiver contracts.
+
+- The input message is a unipolar rectangular pulse with amplitude 1 and duration 2048 samples inside a 4096-sample record. Its sharp edges create sinc-like spectral sidelobes, so empirical bandwidth depends on the chosen occupied-energy criterion and on whether the DC component is removed.
+- For LC with this unipolar rectangular pulse, all requested modulation indices keep $1+\mu m[n]$ nonnegative, so the envelope does not fold. Larger $\mu$ mainly increases envelope depth and sideband power.
+- For SC with this nonnegative pulse, envelope detection can recover the pulse support in the ideal noiseless case; its practical error is dominated by noise and detector inertia rather than sign loss.
+- Bad envelope inertia smooths too aggressively. It reduces carrier ripple, but it also stretches the falling edge of the rectangular pulse, which changes the ACF, PSD, and waveform error.
+- Coherent demodulation degrades with $\phi$ according to the analytical factor $\cos\phi$. The shape can remain high after affine calibration, but the raw NMSE grows because the receiver calibrated for zero phase receives the wrong amplitude and, for LC, the wrong DC level.
+- IQ demodulation can correct a pure carrier phase rotation by rotating the recovered complex envelope. IQ imbalance is different: unequal I/Q gains and quadrature skew deform the complex plane, so phase correction alone does not remove all error.
+
+## 13. Final Conclusions
+
+1. DSB-SC modulation translates the baseband spectrum to symmetric sidebands and suppresses the carrier line. Its transmitted amplitude changes sign with $m(t)$, so envelope detection recovers $|m(t)|$ rather than $m(t)$.
+
+2. DSB-LC adds a carrier bias. When $1+k_a m(t)\geq 0$, the passband envelope is exactly proportional to $1+k_a m(t)$, so a simple envelope detector can recover the message after DC removal and gain correction.
+
+3. Coherent demodulation multiplies by a synchronized sinusoid and low-pass filters. It preserves the signed message and, for WSS inputs, preserves the autocorrelation and PSD shape up to a scale factor.
+
+4. A phase error $\phi$ in coherent demodulation introduces a factor $\cos\phi$ in amplitude and $\cos^2\phi$ in power. The special case $\phi=\pi/2$ gives a null output.
+
+5. IQ demodulation is the general baseband method. It recovers the complex envelope $u(t)$, from which amplitude, phase, frequency offset, carrier phase, and signed DSB-SC information can be analyzed.
+
+6. The correct receiver depends on the transmitted signal contract: envelope detection matches DSB-LC under no overmodulation, while DSB-SC requires coherent or IQ demodulation for signed message recovery.
+
+7. In the assigned rectangular-pulse experiment, increasing AWGN lowers all receiver metrics, but the dominant impairment depends on receiver type: envelope detection is mainly limited by RC inertia and noise, coherent detection is mainly limited by the $\cos\phi$ phase-error factor, and IQ detection can remove pure phase rotation but remains sensitive to I/Q gain and quadrature imbalance.
+
+8. The notebook now verifies both quadrature and canonical representations analytically and empirically: LC and SC are written as $I[n]\cos(2\pi f_c n\Delta t)-Q[n]\sin(2\pi f_c n\Delta t)$ and as $A[n]\cos(2\pi f_c n\Delta t+\varphi[n])$, while the IQ experiment estimates $\widehat{I}$, $\widehat{Q}$, $\widehat{A}$, and $\widehat{\varphi}$ under ideal and imbalanced IQ conditions.
